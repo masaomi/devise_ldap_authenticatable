@@ -3,7 +3,7 @@ module Devise
     class Connection
       attr_reader :ldap, :login
 
-      def initialize(params = {})
+      def initialize(params = {}, base=nil)
         if ::Devise.ldap_config.is_a?(Proc)
           ldap_config = ::Devise.ldap_config.call
         else
@@ -17,6 +17,7 @@ module Devise
         @ldap.host = ldap_config["host"]
         @ldap.port = ldap_config["port"]
         @ldap.base = ldap_config["base"]
+        @ldap.base = (base||ldap_config["base"])
         @attribute = ldap_config["attribute"]
         @allow_unauthenticated_bind = ldap_config["allow_unauthenticated_bind"]
 

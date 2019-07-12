@@ -11,8 +11,17 @@ module Devise
                    :ldap_auth_username_builder => ::Devise.ldap_auth_username_builder,
                    :admin => ::Devise.ldap_use_admin_to_bind}
 
-        resource = Devise::LDAP::Connection.new(options)
-        resource.authorized?
+        ldap_config = YAML.load(ERB.new(File.read(::Devise.ldap_config || "#{Rails.root}/config/ldap.yml")).result)[Rails.env]
+        bases = ldap_config["base"]
+        bases = [bases] unless bases.is_a?(Array)
+        bases.each do |base|
+        # Initializer now accepts a second parameter: base
+          resource = Devise::LDAP::Connection.new(options, base)
+          if resource.authorized?
+            return true
+          end
+        end
+        false
       end
 
       def self.expired_valid_credentials?(login, password_plaintext)
